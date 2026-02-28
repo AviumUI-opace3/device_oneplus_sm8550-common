@@ -91,52 +91,34 @@ BOARD_KERNEL_BASE := 0x00000000
 BOARD_KERNEL_PAGESIZE := 4096
 BOARD_KERNEL_IMAGE_NAME := Image
 
-TARGET_KERNEL_SOURCE := kernel/oneplus/sm8550
+PREBUILT_PATH := $(COMMON_PATH)-kernel
+TARGET_NO_KERNEL_OVERRIDE := true
+TARGET_KERNEL_SOURCE := $(PREBUILT_PATH)/kernel-headers
 
-TARGET_KERNEL_ADDITIONAL_FLAGS := CONFIG_OPLUS_DEVICE_DTBS=y
-TARGET_KERNEL_CONFIG := \
-    gki_defconfig \
-    vendor/kalama_GKI.config \
-    vendor/oplus/kalama_GKI.config \
-    vendor/debugfs.config
+TARGET_PREBUILT_KERNEL := $(PREBUILT_PATH)/Image
+PRODUCT_COPY_FILES += \
+	$(PREBUILT_PATH)/Image:kernel
+
+BOARD_PREBUILT_DTBIMAGE_DIR := $(PREBUILT_PATH)/dtbs/oplus-prebuilt
+BOARD_PREBUILT_DTBOIMAGE := $(PREBUILT_PATH)/dtbs/aston-23801-23861-dtbo.img
 
 # Kernel modules
-BOARD_SYSTEM_KERNEL_MODULES_LOAD := $(strip $(shell cat $(COMMON_PATH)/modules.load.system_dlkm))
-BOARD_VENDOR_KERNEL_MODULES_BLOCKLIST_FILE := $(TARGET_KERNEL_SOURCE)/modules.vendor_blocklist.msm.kalama
-BOARD_VENDOR_KERNEL_MODULES_LOAD := $(strip $(shell cat $(COMMON_PATH)/modules.load))
-BOARD_VENDOR_RAMDISK_KERNEL_MODULES_BLOCKLIST_FILE := $(BOARD_VENDOR_KERNEL_MODULES_BLOCKLIST_FILE)
-BOARD_VENDOR_RAMDISK_KERNEL_MODULES_LOAD := $(strip $(shell cat $(COMMON_PATH)/modules.load.first_stage))
-BOARD_VENDOR_RAMDISK_RECOVERY_KERNEL_MODULES_LOAD := $(strip $(shell cat $(COMMON_PATH)/modules.load.first_stage $(COMMON_PATH)/modules.load.recovery))
-BOOT_KERNEL_MODULES := $(strip $(shell cat $(COMMON_PATH)/modules.include.vendor_ramdisk $(COMMON_PATH)/modules.load.first_stage $(COMMON_PATH)/modules.load.recovery))
-SYSTEM_KERNEL_MODULES := $(strip $(shell cat $(COMMON_PATH)/modules.include.system_dlkm))
+GKI_VERSION := 5.15.167-android13-8-android13-5.15-2024-11_r4-dirty
+DLKM_MODULES_PATH := $(PREBUILT_PATH)/vendor_dlkm
+RAMDISK_MODULES_PATH := $(PREBUILT_PATH)
+SYSTEM_DLKM_MODULES_PATH := $(PREBUILT_PATH)/system_dlkm/lib/modules/$(GKI_VERSION)
 
-TARGET_KERNEL_EXT_MODULE_ROOT := kernel/oneplus/sm8550-modules
-TARGET_KERNEL_EXT_MODULES := \
-    qcom/opensource/mmrm-driver \
-    qcom/opensource/mm-drivers/hw_fence \
-    qcom/opensource/mm-drivers/msm_ext_display \
-    qcom/opensource/mm-drivers/sync_fence \
-    qcom/opensource/audio-kernel \
-    qcom/opensource/camera-kernel \
-    qcom/opensource/dataipa/drivers/platform/msm \
-    qcom/opensource/datarmnet/core \
-    qcom/opensource/datarmnet-ext/aps \
-    qcom/opensource/datarmnet-ext/offload \
-    qcom/opensource/datarmnet-ext/shs \
-    qcom/opensource/datarmnet-ext/perf \
-    qcom/opensource/datarmnet-ext/perf_tether \
-    qcom/opensource/datarmnet-ext/sch \
-    qcom/opensource/datarmnet-ext/wlan \
-    qcom/opensource/securemsm-kernel \
-    qcom/opensource/display-drivers/msm \
-    qcom/opensource/eva-kernel \
-    qcom/opensource/video-driver \
-    qcom/opensource/graphics-kernel \
-    qcom/opensource/wlan/platform \
-    qcom/opensource/wlan/qcacld-3.0/.kiwi_v2 \
-    qcom/opensource/bt-kernel \
-    nxp/opensource/driver \
-    oplus/kernel/explorer
+PRODUCT_COPY_FILES += \
+    $(call find-copy-subdir-files,*,$(SYSTEM_DLKM_MODULES_PATH)/,$(TARGET_COPY_OUT_SYSTEM_DLKM)/lib/modules/$(GKI_VERSION)/)
+
+BOARD_VENDOR_KERNEL_MODULES := $(wildcard $(DLKM_MODULES_PATH)/*.ko)
+BOARD_VENDOR_KERNEL_MODULES_LOAD := $(patsubst %,$(DLKM_MODULES_PATH)/%,$(shell cat $(DLKM_MODULES_PATH)/modules.load))
+BOARD_VENDOR_KERNEL_MODULES_BLOCKLIST_FILE := $(DLKM_MODULES_PATH)/modules.blocklist
+
+BOARD_VENDOR_RAMDISK_KERNEL_MODULES := $(wildcard $(RAMDISK_MODULES_PATH)/*.ko)
+BOARD_VENDOR_RAMDISK_KERNEL_MODULES_LOAD := $(patsubst %,$(RAMDISK_MODULES_PATH)/%,$(shell cat $(RAMDISK_MODULES_PATH)/modules.load))
+BOARD_VENDOR_RAMDISK_RECOVERY_KERNEL_MODULES_LOAD := $(patsubst %,$(RAMDISK_MODULES_PATH)/%,$(shell cat $(RAMDISK_MODULES_PATH)/modules.load.recovery))
+BOARD_VENDOR_RAMDISK_KERNEL_MODULES_BLOCKLIST_FILE := $(DLKM_MODULES_PATH)/modules.blocklist
 
 # Platform
 BOARD_USES_QCOM_HARDWARE := true

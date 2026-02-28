@@ -205,7 +205,7 @@ $(call soong_config_set,libinit,vendor_init_lib,//$(LOCAL_PATH):libinit_oplus)
 PRODUCT_ENABLE_UFFD_GC := true
 
 PRODUCT_COPY_FILES += \
-    kernel/oneplus/sm8550/modules.systemdlkm_blocklist.msm.kalama:$(TARGET_COPY_OUT_VENDOR_DLKM)/lib/modules/system_dlkm.modules.blocklist
+    device/oneplus/sm8550-common-kernel/modules.systemdlkm_blocklist.msm.kalama:$(TARGET_COPY_OUT_VENDOR_DLKM)/lib/modules/system_dlkm.modules.blocklist
 
 # Keymint
 PRODUCT_PACKAGES += \
